@@ -9,7 +9,7 @@ const safeRequire = (name) => {
     return require(name);
   } catch (error) {
     if (error && error.code === 'MODULE_NOT_FOUND') {
-      console.log(`Error: Cannot find module '${name}', have you installed the dependencies?`);
+      console.error(`Error: Cannot find module '${name}', have you installed the dependencies?`);
       process.exit(1);
     }
     throw error;
@@ -128,7 +128,7 @@ class Validator {
 
       if (!valid) {
         const output = betterAjvErrors('scraper', data, validate.errors, { indent: 2 });
-        console.log(output);
+        console.error(output);
       }
 
       if (this.verbose || !valid) {
