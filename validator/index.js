@@ -43,6 +43,7 @@ class Validator {
     this.stopOnError = !flags.includes('-a');
     this.sortedURLs = flags.includes('-s');
     this.verbose = flags.includes('-v');
+    this.ci = flags.includes('--ci');
 
     const schemaPath = path.resolve(__dirname, './scraper.schema.json');
     this.schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
@@ -79,6 +80,13 @@ class Validator {
     });
   }
 
+  logError(message) {
+    if (this.ci) {
+      message = `::error::${message}`
+    }
+    console.log(message);
+  }
+
   run(files) {
     let scrapers;
 
@@ -105,9 +113,9 @@ class Validator {
         const contents = fs.readFileSync(file, 'utf8');
         data = YAML.parse(contents, yamlLoadOptions);
       } catch (error) {
-        console.error(`\x1b[31mError\x1b[0m in: ${relPath}:`);
+        this.logError(`\x1b[31mError\x1b[0m in: ${relPath}:`);
         error.stack = null;
-        console.error(error);
+        this.logError(error);
         result = result && false;
         if (this.stopOnError) break;
         else continue;
@@ -133,7 +141,7 @@ class Validator {
 
       if (this.verbose || !valid) {
         const validColor = valid ? '\x1b[32m' : '\x1b[31m';
-        console.log(`${relPath} Valid: ${validColor}${valid}\x1b[0m`);
+        this.logError(`${relPath} Valid: ${validColor}${valid}\x1b[0m`);
       }
 
       result = result && valid;
